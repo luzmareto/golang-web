@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -44,6 +45,65 @@ func TestTTemplateFunction(t *testing.T) {
 
 	//memanggil func TemplateLayout
 	TemplateFunction(recorder, request)
+
+	body, _ := io.ReadAll(recorder.Result().Body)
+
+	fmt.Println(string(body))
+}
+
+// simple global func
+func TemplateFunctionGlobal(writer http.ResponseWriter, request *http.Request) {
+	t := template.Must(template.New("FUNCTION").Parse(`{{len .Name}}`))
+
+	//execute template menggunakan parameter writter,FUCNTION dan struct MyPage
+	t.ExecuteTemplate(writer, "FUNCTION", MyPage{
+		Name: "Luz",
+	})
+}
+
+func TestTTemplateFunctionGlobal(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080", nil)
+	recorder := httptest.NewRecorder()
+
+	//memanggil func TemplateLayout
+	TemplateFunctionGlobal(recorder, request)
+
+	body, _ := io.ReadAll(recorder.Result().Body)
+
+	fmt.Println(string(body))
+}
+
+/*
+ALUR PEMBUATAN GLOBAL FUNCTION :
+1. buat fun handle TemplateFunctionCreateGlobal
+2. gunakan anonym func pada saat register nama func
+3. buat unit testing
+4. maka value dari  field name akan berubah menjadi huruf kapital
+*/
+
+func TemplateFunctionCreateGlobal(writer http.ResponseWriter, request *http.Request) {
+	t := template.New("FUNCTION")
+
+	//upper adalah nama func
+	t = t.Funcs(map[string]interface{}{
+		"upper": func(value string) string {
+			return strings.ToUpper(value)
+		},
+	})
+	t = template.Must(t.Parse(`{{ upper .Name}}`))
+
+	//execute template menggunakan parameter writter,FUCNTION dan struct MyPage
+	t.ExecuteTemplate(writer, "FUNCTION", MyPage{
+		Name: "luz mareto",
+	})
+}
+
+func TestTTemplateFunctionCreateGlobal(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080", nil)
+	recorder := httptest.NewRecorder()
+
+	//memanggil func TemplateFunctionCreateGlobal
+	TemplateFunctionCreateGlobal(recorder, request)
 
 	body, _ := io.ReadAll(recorder.Result().Body)
 
