@@ -1,7 +1,6 @@
 package golang_web
 
 import (
-	"embed"
 	"fmt"
 	"html/template"
 	"io"
@@ -82,9 +81,6 @@ Mmebuat embed template
 2. buat func handler untuk TemplateEmbed
 3. masukan var templates ke dalam template.Must
 */
-
-//go:embed templates/*.gohtml
-var templates embed.FS
 
 func TemplateEmbed(writer http.ResponseWriter, request *http.Request) {
 	//render file simple.gohtml pada package templates
